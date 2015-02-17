@@ -1,0 +1,7 @@
+#CROUS
+#khepera
+8/ssh -t -t -X khepera@192.168.119.96 "cd Dropbox/Code/luaN ; /bin/bash"
+#nkalde
+#8/ssh -t -t -X nkalde@192.168.119.156 "cd Dropbox/Code/luaN ; /bin/bash"
+#8 cores on the local computer
+8/:

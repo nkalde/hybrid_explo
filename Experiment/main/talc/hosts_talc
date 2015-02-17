@@ -1,0 +1,1 @@
+ssh -t -t -t -X talc-13.nancy.g5k "cd kalde_local ; /bin/bash"

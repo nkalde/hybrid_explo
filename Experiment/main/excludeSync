@@ -1,0 +1,10 @@
+#mac simulator
+*Mac_min*
+*Mac*
+#hidden files
+.*
+#Test folder
+#*Test*
+#data folder
+*Experiment/data*
+*monitoring/data/*

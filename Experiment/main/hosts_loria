@@ -1,0 +1,27 @@
+#LORIA
+
+#fourmi
+#8/ssh -t -t -t -X fourmi "cd /home/khepera/kalde_local ; /bin/bash"
+
+#maia1-is
+8/ssh -t -t -t -X maia1-is "cd /home/adminmaia/kalde_local ; /bin/bash"
+
+#maia3-is
+#8/ssh -t -t -t -X maia3-is "cd /home/kalde_local ; /bin/bash"
+
+#cain
+#8/ssh -t -t -t -X cain "cd Dropbox/Code/luaN ; /bin/bash"
+
+#local computer
+#8/:
+
+#nuc
+#4/ssh -t -t -t -X nuc1 "cd kalde_local ; /bin/bash"
+#4/ssh -t -t -t -X nuc2 "cd kalde_local ; /bin/bash"
+#4/ssh -t -t -t -X nuc3 "cd kalde_local ; /bin/bash"
+#4/ssh -t -t -t -X nuc4 "cd kalde_local ; /bin/bash"
+#4/ssh -t -t -t -X nuc5 "cd kalde_local ; /bin/bash"
+#4/ssh -t -t -t -X nuc6 "cd kalde_local ; /bin/bash"
+#4/ssh -t -t -t -X nuc7 "cd kalde_local ; /bin/bash"
+
+#frontend talc
