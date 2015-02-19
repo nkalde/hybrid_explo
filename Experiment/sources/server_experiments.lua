@@ -160,7 +160,7 @@ while (simGetSimulationState()~=sim_simulation_advancing_abouttostop) do
         writeMapSignal(serverMap, server)
       
         --drawing
-        local frontiers=extractFrontiers(serverMap)
+        local frontiers = extractFrontiers(serverMap)
         drawExploMap(serverMap)
         drawFrontiersG(frontiers,explorers,humans)
     end  

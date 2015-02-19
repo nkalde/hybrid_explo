@@ -7,7 +7,7 @@ runScript=./Experiment/main/run.sh
 #$scene $tim $nbr $den $opt $alp $sig $max $num
 tim=300000
 nbr=0
-den=0.1
+den=0
 opt=3
 alp=0.25
 sig=0.25
@@ -17,6 +17,7 @@ scenes[0]='test_empty.ttt'
 scenes[1]='test_cave.ttt'
 scenes[2]='test_roomsN.ttt'
 scenes[3]='test_corridor.ttt'
+scenes[4]='test_3rooms_corridor_small.ttt'
 
 #params="${scenes[0]} -s$tim -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num -q"
 #$runScript \
@@ -34,7 +35,7 @@ scenes[3]='test_corridor.ttt'
 #$runScript \
 #$params
 
-params="${scenes[3]} -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num"
+params="${scenes[1]} -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num"
 $runScript \
 $params
 

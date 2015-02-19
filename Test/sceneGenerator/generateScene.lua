@@ -1,5 +1,6 @@
-package.path = package.path .. ";"..os.getenv('PWD').."/Test/sceneGenerator/lua-imlib2-0.1/?.lua"
-print(package.path)
+package.path = package.path .. ";" .. "/home/parallels/lua-imlib2-0.1/?.lua" 
+package.cpath = package.cpath .. ";" ..  "/home/parallels/lua-imlib2-0.1/?.so"
+--print(package.path)
 local imlib2 = require("imlib2")
 --local profiler = require("profiler")
 
@@ -556,7 +557,7 @@ end
 if (simGetScriptExecutionCount()==0) then
   dofile(os.getenv('PWD')..'/Core/header.lua')
   targetDir=os.getenv('PWD')..'/Test/scenes'
-  mapDir=os.getenv('HOME')..'/Dropbox/maps'
+  mapDir=os.getenv('PWD')..'/Test/scenes/bitmaps'
   bCode = 29+2
   jump = 1
   floor_color  = {104/255,105/255,127/255,1}
@@ -594,20 +595,24 @@ if (simGetScriptExecutionCount()==0) then
   --'SFU_800x600.png',
   'human_outline.png',
   'uoa_robotics_lab.png', --18
-  'high_res_obstacle_shadow.png'
+  'high_res_obstacle_shadow.png',
+'structured_small.png'
 }
   --for i=1,#fNames,1 do
-    i = 19
+    i = 20
     --for j=1,#funcs,1 do
       j = 2
       --generate = funcs[j]
       --for k=1,#neighs,1 do
         k = 2 
         --neighborsF = neighs[k]
-        local handles = loadMap(mapDir..'/player_stage_bitmaps/'..fNames[i])
+        
+	print(i,j,k,fNames[i]);
+	local handles = loadMap(mapDir..'/'..fNames[i])
         for m=1,#handles do
           simSetObjectSpecialProperty(handles[m],sim_objectspecialproperty_detectable_all)
         end
+	
         simSaveScene(targetDir..'/'..fNames[i]..'_'..funcs[j]..'_'..neighs[k]..'.ttt')
         simRemoveObjectFromSelection(handles)
         --simLoadScene('/Users/nkalde/Dropbox/vrep_scenes/test/test_generate_copy.ttt')
