@@ -1,5 +1,5 @@
-package.path = package.path .. ";" .. "/home/parallels/lua-imlib2-0.1/?.lua" 
-package.cpath = package.cpath .. ";" ..  "/home/parallels/lua-imlib2-0.1/?.so"
+package.path = package.path .. ";" .. os.getenv('PWD')..'/Test/sceneGenerator/lua-imlib2-0.1/?.lua' 
+package.cpath = package.cpath .. ";" ..  os.getenv('PWD').."/Test/sceneGenerator/lua-imlib2-0.1/?.so"
 --print(package.path)
 local imlib2 = require("imlib2")
 --local profiler = require("profiler")
