@@ -44,3 +44,6 @@ Experiment/30T*
 Experiment/corridor*
 Simulator/
 #Test/
+
+#Mac files
+.DS_Store

@@ -35,7 +35,7 @@ scenes[4]='test_3rooms_corridor_small.ttt'
 #$runScript \
 #$params
 
-params="${scenes[1]} -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num"
+params="${scenes[0]} -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num"
 $runScript \
 $params
 
