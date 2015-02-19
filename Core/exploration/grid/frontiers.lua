@@ -226,7 +226,7 @@ getFrontiersOrientation=function(cellsL,targets,robot)--robot in known space
   end
   for i,target in ipairs(targets) do
     --getFrontierOrientation(cells,robot)
-    local angle, rV = sGetFrontierOrientation(target)
+    local angle, rV = sGetFrontierOrientationSigned(target)
     print('c ('..target[1],target[2]..')->'..angle)
     --drawing
     local xy = getPoseXY(target)
