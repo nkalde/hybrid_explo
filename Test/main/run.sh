@@ -20,13 +20,12 @@ else
 		echo "scene: "$1
 		
 		if [[ "$platform" == 'linux' ]]; then
-			distrib=V-REP_PRO_EDU_V3_2_0_rev3_64_Linux
+			distrib=V-REP_PRO_EDU_V3_2_0_rev4_64_Linux
 			LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$dirdistrib/$distrib
 			export LD_LIBRARY_PATH
 			echo $LD_LIBRARY_PATH
 		elif [[ "$platform" == 'darwin' ]]; then
-			distrib=V-REP_PRO_EDU_V3_1_2_Mac/vrep.app/Contents/MacOS
-			#distrib=V-REP_PRO_EDU_V3_1_2_Mac_min/vrep.app/Contents/MacOS
+			distrib=V-REP_PRO_EDU_V3_2_0_rev4_Mac/vrep.app/Contents/MacOS
 		fi
 	
 		$dirdistrib/$distrib/vrep \

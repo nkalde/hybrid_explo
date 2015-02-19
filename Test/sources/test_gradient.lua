@@ -63,7 +63,7 @@
       printNeighbors(insideI,maxJ-1,neighborsFunction) --edge ok
       --]]
       
-      --[[
+      ---[[
       --TEST GRADIENT
       print('','Test Gradient')
       for j=1,#gradientFunctions do
