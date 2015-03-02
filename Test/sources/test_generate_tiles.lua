@@ -632,7 +632,8 @@ createTiles=function()
   --create tileDataUnit
   tileDataUnit = {}
   local sensorId = {'_SE','_NE','_SW','_NW'}
-  for i,coords in ipairs(tiles_coord) do
+  for i=1,#tiles_coord do
+      local coords =  tiles_coord[i]
       local xmin, ymin, xmax, ymax = coords[1],coords[2],coords[3],coords[4]
       local width, height = xmax-xmin, ymax-ymin
       local coord = tiles_x0y0[i]
@@ -654,9 +655,11 @@ createTiles=function()
 
   --create sensorDataUnit
   sensorDataUnit = {}
-  for i, sensorsI in ipairs(sensors_xy) do
+  for i=1,#sensors_xy do
+    local sensorsI =  sensors_xy[i]
     local xI, yI = tiles_x0y0[i][1], tiles_x0y0[i][2]
-    for j, sensorIJ in ipairs(sensorsI) do
+    for j=1,#sensorsI do
+      local sensorIJ = sensorsI[j]
       local x, y = xI+sensorIJ[1], yI+sensorIJ[2]
       
       --sensor data unit
@@ -679,7 +682,8 @@ createTiles=function()
   
   --model tile
   local rectangles = {}
-  for i, v in ipairs(tileDataUnit) do
+  for i=1,#tileDataUnit do
+    local v = tileDataUnit[i]
     local width, height, pos = v['width'],v['height'],v['pos']
     local handle = simCreatePureShape(0,bCode,{width,height,tile_height},0,nil)
     simSetObjectPosition(handle,-1,{pos[1],pos[2],0})
@@ -702,19 +706,22 @@ createTiles=function()
       
   --tiles
   local tiles = {}
-  for i, rectangleI in ipairs(rectangles) do
+  for i=1,#rectangles do
+      local rectangleI = rectangles[i]
       local groupI = {rectangleI}
-      for j, sensorIJ in ipairs(sensors[i]) do
-        table.insert(groupI,#groupI+1,sensorIJ)
+      for j=1,#sensors[i] do
+        local sensorIJ =  sensors[i][j]
+        groupI[#groupI+1]=sensorIJ
       end
       local tileI = simGroupShapes(groupI)
       simSetObjectName(tileI,'Tile_'..i)
-      table.insert(tiles,i,tileI)
+      tiles[i]=tileI
   end
   
   --usable/unusable tiles
   usable_tiles, unusable_tiles = {}, {}
-  for i, tileI in ipairs(tiles) do
+  for i=1,#tiles do
+    local tileI = tiles[i]
     if tiles_state[i] == 1 then
       usable_tiles[#usable_tiles+1] = tileI
     else
@@ -770,7 +777,8 @@ updateTile=function(rawLine)
   --update sensors
   local sensorId = {i..'_SE',i..'_NE',i..'_SW',i..'_NW'}
   local sensorVal = {sensorValSE,sensorValNE,sensorValSW,sensorValNW}
-  for i, id in ipairs(sensorId) do
+  for i=1,#sensorId do
+    local id = sensorId[i]
     local aval = sensorDataUnit[id]['value']
     sensorDataUnit[id]['value']=sensorVal[i]--0.01*aval + 0.99*sensorVal[i]
   end

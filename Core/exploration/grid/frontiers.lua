@@ -67,8 +67,8 @@ findComponents=function(frontiers, intraDF)
       listsF[index] = {}
       local l = lists[index]
       local lF = listsF[index]
-      table.insert(l,#l+1,i)
-      table.insert(lF,#lF+1,frontiers[i])
+      l[#l+1]=i
+      lF[#lF+1]=frontiers[i]
       set, l, lF = findSameFrontier(i,set,l,intraDF,frontiers,lF)       
       lists[#lists] = l
       listsF[#listsF] = lF
@@ -109,7 +109,7 @@ frontiersMinusA =function(frontiers, AinN)
       j = j+1
     end
     if not found then
-      table.insert(frontiersN,#frontiersN+1,f)
+      frontiersN[#frontiersN+1]=f
     end
   end
   return frontiersN
@@ -140,13 +140,16 @@ end
 --min in list
 minSelectionF=function(lists,frontiers,intraDF)
   local listsT = {}
-  for l,list in ipairs(lists) do
+  for l=1,#lists do
+    local list = lists[l]
     local min = math.huge
     local f=-1
     --compute sum to other frontiers
-    for i,a in ipairs(list) do
+    for i=1,#list do
+      local a = list[i]
       local sumA = 0
-      for j,b in ipairs(list) do
+      for j=1,#list do
+        local b = list[j]
         sumA = sumA + intraDF[a][b]
       end
       if sumA < min then
@@ -172,7 +175,8 @@ drawFrontiers=function(frontiersT)
     frontiersDrawing=simAddDrawingObject(sim_drawing_quadpoints+sim_drawing_itemcolors+sim_drawing_cyclic+sim_drawing_itemtransparency,coef/2,0.0,-1,#frontiersT,{0,0,0},nil,nil,nil)
   end
   local zW = 0.0001
-	for i,v in ipairs(frontiersT) do
+	for i=1,#frontiersT do
+	  local v = frontiersT[i]
 		local xW, yW = mappingGrid2World(v[1], v[2])
 		simAddDrawingObjectItem(frontiersDrawing,{xW;yW;zW;0;0;1;1;1;1;transparency})
 	end
@@ -189,9 +193,12 @@ drawFrontiersG=function(frontiersT,robots,humans)
     drawingFrontiers = simAddDrawingObject(sim_drawing_quadpoints+sim_drawing_itemcolors+sim_drawing_itemtransparency,coef/2,0.0,-1,#frontiersT,nil,nil,nil,nil)
   end
   
-  for i,v in ipairs(facFrontiers) do
-    local r,g,b = math.random(),0--[[math.random()--]],math.random()
-    for i2,v2 in ipairs(v) do
+  for i=1,#facFrontiers do
+    local v = facFrontiers[i]
+    local r,g,b = 1,1,1
+    --local r,g,b = math.random(),0--[[math.random()--]],math.random()
+    for i2=1,#v do
+      local v2 = v[i2]
       local xW, yW = mappingGrid2World(v2[1], v2[2])
       simAddDrawingObjectItem(drawingFrontiers,{xW;yW;zW;0;0;1;r;g;b;transparency})
     end
@@ -208,7 +215,8 @@ drawFrontiersRepresent=function(frontiersT)
     drawingFrontiers = simAddDrawingObject(sim_drawing_quadpoints+sim_drawing_itemcolors,coef/2,0.0,-1,#a,nil,nil,nil,nil)
   end
   
-  for i,v in ipairs(a) do
+  for i=1,#a do
+    local v = a[i]
     local r,g,b = math.random(),math.random(),math.random()
     local xW, yW = mappingGrid2World(v[1], v[2])
     simAddDrawingObjectItem(drawingFrontiers,{xW;yW;zW;0;0;1;r;g;b})
@@ -224,7 +232,8 @@ getFrontiersOrientation=function(cellsL,targets,robot)--robot in known space
     simRemoveDrawingObject(drawOrientations)
     drawOrientations=simAddDrawingObject(sim_drawing_lines+sim_drawing_cyclic+sim_drawing_itemcolors,5,0.0,-1,linesN,{0,0,0},nil,nil,nil)
   end
-  for i,target in ipairs(targets) do
+  for i=1,#targets do
+    local target = targets[i]
     --getFrontierOrientation(cells,robot)
     local angle, rV = sGetFrontierOrientationSigned(target)
     print('c ('..target[1],target[2]..')->'..angle)
@@ -242,7 +251,8 @@ sGetFrontierOrientationSigned=function(cell)
   local xyN = {}
   --print(cell[1],cell[2])
   local neighbors = neighborsFunction(cell)
-  for i,n in ipairs(neighbors) do
+  for i=1,#neighbors do
+    local n = neighbors[i]
     if n~= -1 then
       local a,b = n[1],n[2]
       if exploGrid[a][b] == unk then
@@ -252,7 +262,8 @@ sGetFrontierOrientationSigned=function(cell)
   end
   --compute resultant vector
   local rV = {0,0}
-  for i,v in ipairs(xyN) do
+  for i=1,#xyN do
+    local v = xyN[i]
     local vect = {v[1]-xy[1],v[2]-xy[2]}
     rV = {rV[1]+vect[1],rV[2]+vect[2]}
   end
@@ -270,7 +281,8 @@ end
 getFrontierOrientationOldComplicated=function(cells,robot)--robot in known space
 
   --from IJ to XY frontiers points
-  for i,c in ipairs(cells) do
+  for i=1,#cells do
+    local c = cells[i]
     cells[i] = getPoseXY(c)
   end
   

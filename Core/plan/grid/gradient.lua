@@ -86,7 +86,7 @@
   						if (gradientGrid[nI][nJ] == math.huge) then --not set or obstacle
   							if not occupied(nI,nJ) then
   								if not flags[nI..','..nJ] then
-  									table.insert(newTodo,#newTodo+1,{nI,nJ})
+  									newTodo[#newTodo+1]={nI,nJ}
   									flags[nI..','..nJ] = true
   							   	end
   							end
@@ -154,7 +154,7 @@
   									else
   										inc = 5
   									end
-  									table.insert(newTodo,#newTodo+1,{{nI,nJ},val+inc})
+  									newTodo[#newTodo+1]={{nI,nJ},val+inc}
   									flags[nI..','..nJ] = true
   							   	end
   							end

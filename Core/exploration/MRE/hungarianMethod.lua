@@ -16,7 +16,8 @@ end
 
 function showArray(a)
   local line = ""
-  for i, v in ipairs(a) do
+  for i=1,#a do
+    local v = a[i]
     if i>1 then line = line .. ", " end
     line = line .. v
   end
@@ -37,7 +38,8 @@ function munkres(costMat)
       Z0 = { row=0, col=0 }
     }
     
-    for i, v in ipairs(costMat) do
+    for i=1,#costMat do
+      local v = costMat[i]
       if #v ~= m.size then return nil end
       m.rowCover[i] = 0
       m.colCover[i] = 0

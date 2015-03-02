@@ -1,4 +1,5 @@
 dofile(os.getenv('PWD')..'/Core/exploration/costs/interactive_h.lua')
+dofile(os.getenv('PWD')..'/Core/exploration/costs/interactive_update.lua')
 
 ---------
 --COSTS--
@@ -15,9 +16,9 @@ costMatrixFrontierTarget=function(explorers, frontiers)
   
   --explorers poses
   local explorerPoses = {}
-  for k,v in ipairs(explorers) do
-    local pose = getPoseIJ(v)
-    explorerPoses[k] = pose
+  for i=1,#explorers do
+    local pose = getPoseIJ(explorers[i])
+    explorerPoses[i] = pose
   end
   
   --explorers (lines) X frontiers (columns) cost map
@@ -47,9 +48,9 @@ costMatrixFrontierComponent=function(explorers, frontiers, frontiersL)
   
   --explorers poses
   local explorerPoses = {}
-  for k,v in ipairs(explorers) do
-    local pose = getPoseIJ(v)
-    explorerPoses[k] = pose
+  for i=1,#explorers do
+    local pose = getPoseIJ(explorers[i])
+    explorerPoses[i] = pose
   end
   
   --explorers (lines) X frontiers (columns) cost map

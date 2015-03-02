@@ -18,7 +18,7 @@ lrtaS=function(s0,sG,actions,depth)
  		if bNeighbor ~= nil then
 	 		s1 = {bNeighbor[1],bNeighbor[2],0}
 	 	end
- 		table.insert(actions,s0) --modify this bIndex to a grid position
+ 		actions[#actions+1]=s0 --modify this bIndex to a grid position
  		s0 = s1
  		lrtaS(s0,sG,actions,depth+1)
  	end

@@ -84,8 +84,61 @@ updateOccupiedSet=function(objects)
 end
 
 --dilate
-dilate = 0.2
-dilateHuman=function(object)
+intimate_distance = 0.20
+--human personal space
+local pSpaceMask=function(dilate)
+  if pSpace==nil then
+    pSpace = {}
+    local posX = {0,0}
+    local posI = {0,0}
+    local list={{posI,0}}
+    local first,last=1,1
+    local marked = {}
+    
+    while(first <= last) do
+      local cell,radius = list[first][1], list[first][2]
+      local a,b = cell[1],cell[2]
+      local key=a..'#'..b
+      
+      if marked[key] == nil and radius<=dilate then
+        local x,neighbors = neighborsFunction(a,b) --pb if size grid too small
+        for i=1,#neighbors do
+          local n = neighbors[i]
+            local a,b= n[1],n[2]
+            local nX = {a*coef,b*coef}
+            local key=a..'#'..b
+            if marked[key] == nil then
+              list[#list+1] = {n,distanceFunction(posX,nX)}
+              last=last+1
+            end
+        end
+      end
+      
+      pSpace[#pSpace+1] = cell
+      marked[key]=true
+      first=first+1
+    end
+  end
+end
+
+
+dilateHuman=function(object) --first ver cannot see the boundaries --less redundancy
+  pSpaceMask(intimate_distance)
+  local fullPSpace, realPSpace = pSpace, {}
+  local p = getPoseIJ(object)
+
+  for i=1,#fullPSpace do
+    local v0 = fullPSpace[i]
+    local v = {v0[1]+p[1], v0[2]+p[2]}
+    local a,b = v[1], v[2]
+    if insideGrid(a,b) == true then
+      realPSpace[#realPSpace+1] = v
+    end
+  end
+  return realPSpace
+end
+
+dilateHumanOld=function(object)
   local posX = getPoseXY(object)
   local posI = getPoseIJ(object)
   local list={{posI,0}}
@@ -97,7 +150,8 @@ dilateHuman=function(object)
     local key=a..'#'..b
     if marked[key] == nil and radius <= dilate then
       local neighbors = neighborsFunction(a,b)
-      for i,n in ipairs(neighbors) do
+      for i=1,#neighbors do
+        local n = neighbors[i]
         if n ~= -1 then
           local nX = getPoseXY(n)
           local a,b= n[1],n[2]
@@ -120,9 +174,9 @@ end
 dilateDynamicSet=function(objects)
   hinderedSet = {}
   for k, obj in pairs(objects) do
-    print(simGetObjectName(obj))
     local dilateSet = dilateHuman(obj)
-    for i, cell in ipairs(dilateSet) do
+    for i=1,#dilateSet do
+      local cell = dilateSet[i]
       local a, b = cell[1], cell[2]
       hinderedSet[a..'#'..b] = true
     end
@@ -155,16 +209,19 @@ scanStaticCells=function()
 end
 
 scanDynamicCells=function(agent) --during navigation dynamic items
+  --print(simGetObjectName(agent))
+  
   --add dynamic content
   local dynamic_items = {}
   local human_items = {}
-  if pos~=nil then --in robot visibility
+  --agent
+  if agent~=nil then --in robot visibility
     --explorers
     if explorersInNeighborhood ~= nil then
       local expIN = explorersInNeighborhood(agent)
       for k,v in pairs(expIN) do
         if v ~= agent then
-          table.insert(dynamic_items,v)
+          dynamic_items[#dynamic_items+1]=v
         end
       end
     end
@@ -172,19 +229,20 @@ scanDynamicCells=function(agent) --during navigation dynamic items
     if humansInNeighborhood ~= nil then
       local humIN = humansInNeighborhood(agent)
       for k,v in pairs(humIN) do
-        table.insert(dynamic_items,v)
-        table.insert(human_items,v)
+        dynamic_items[#dynamic_items+1]=v
+        human_items[#human_items+1]=v
       end
     end
+  --server
   else --in all map
     for k,v in pairs(explorers) do
       if v ~= agent then
-        table.insert(dynamic_items,v)
+        dynamic_items[#dynamic_items+1]=v
       end
     end
     for k,v in pairs(humans) do
-      table.insert(dynamic_items,v)
-      table.insert(human_items,v)
+      dynamic_items[#dynamic_items+1]=v
+      human_items[#human_items+1]=v
     end
   end
   

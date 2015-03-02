@@ -18,8 +18,8 @@ initRMap=function()
 	local rMap = {}
 	for i=1,(maxX-minX)/coef do
 		rMap[i]= {}
-		for j=1,(maxX-minX)/coef do
-			rMap[i][j] = 1
+		for j=1,(maxY-minY)/coef do
+			rMap[i][j] = unk--1
 		end
 	end
 	return rMap

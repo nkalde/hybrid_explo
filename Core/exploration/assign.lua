@@ -4,21 +4,22 @@
 
 assignFrontiers=function(frontiers, agents)
   --update exploration grid
+  updateExplorationGrid(agent)
   local explorerPoseXY = getPoseXY(agent)
   local explorerPoseIJ = getPoseIJ(agent)
-  updateExplorationGrid(agent)
    
   --costs matrix
-  computeC = computeCostsI
+  --computeC = computeCostsI old
   --computeC = computeCosts
+  computeC = computeCostsIROS
   
   --robots set
   local robotsInN = explorersInNeighborhood(agent)
-  table.insert(robotsInN,#robotsInN+1,agent)
+  local agentsN = shallowcopy(robotsInN)
+  agentsN[#agentsN+1]=agent
   
   --humans set
   local humansInN = humansInNeighborhood(agent)
-  local agentsN = robotsInN
   
   --frontiers set (targets, components)
   local frontiersTargets, frontiersComponents = regroupFrontiers(frontiers,robotsInN,humansInN)
@@ -30,7 +31,7 @@ assignFrontiers=function(frontiers, agents)
       return explorationFunction(agent,frontiersTargets)
     else  --MRE
       local assignments = explorationFunction(agentsN,frontiersTargets,humansInN,frontiersComponents)
-      --printAssignments(assignments, agentsN, frontiersTargets, humansInN)
+      printAssignments(assignments, agentsN, frontiersTargets, humansInN)
       local iAssignment = assignments[#agentsN]
       if iAssignment == 0 then
         return explorerPoseIJ
@@ -44,7 +45,11 @@ assignFrontiers=function(frontiers, agents)
         if interactionAffsUpdate then
           interactionAffsUpdate(1)
         end
-        return humansInN[iAssignment-#frontiersTargets]  
+        if iAssignment > #frontiersTargets and iAssignment <= #frontiersTargets + #humansInN then
+          return humansInN[iAssignment-#frontiersTargets]  
+        else
+          return agentsN[iAssignment-#frontiersTargets-#humansInN]
+        end
       end    
     end
   end
@@ -61,9 +66,9 @@ humansInNeighborhood=function(agent) --check into visibility distance
     local position = simGetObjectPosition(humanHandle,-1)
     humanPoses[#humanPoses+1] = {position[1], position[2]}
   end
-  --humanPoses = vectorWorld2Grid(humanPoses)
   local humanNeighbors = {}
-  for i,v in ipairs(humanPoses) do
+  for i=1,#humanPoses do
+    local v = humanPoses[i]
     if distanceFunction(pos,v) < radiusView then--/coef then
       humanNeighbors[#humanNeighbors+1] = humans[i]
     end
@@ -72,7 +77,7 @@ humansInNeighborhood=function(agent) --check into visibility distance
 end
 
 explorersInNeighborhood=function(agent)
-  --humanPoses on the grid
+  --explorerPoses on the grid
   local pos = getPoseXY(agent)
   local explorerPoses = {}
   for i=1,#explorers do
@@ -80,9 +85,9 @@ explorersInNeighborhood=function(agent)
     local position = simGetObjectPosition(explorerHandle,-1)
     explorerPoses[#explorerPoses+1] = {position[1], position[2]}
   end
-  --explorerPoses = vectorWorld2Grid(explorerPoses)
   local explorerNeighbors = {}
-  for i,v in ipairs(explorerPoses) do
+  for i=1,#explorerPoses do
+    local v = explorerPoses[i]
     if distanceFunction(pos,v) < radiusView then--/coef then 
       explorerNeighbors[#explorerNeighbors+1] = explorers[i]
     end
@@ -99,22 +104,32 @@ printAssignments=function(assignments, robots, frontiers, humans)
     print('\n#################')
     print('###Assignments###')
     print('#################\n')
+    print(agentName)
     for k,v in ipairs(assignments) do
+      local name = v
       if v > #frontiers and v <= #frontiers + #humans then
         local human = humans[v-#frontiers]
-        v = simGetObjectName(human)
-        --simAddObjectToSelection({human})
-        --simRemoveObjectFromSelection(sim_handle_all)
+        name = simGetObjectName(human)
+      end
+      if v > #frontiers + #humans and v <= #frontiers + #humans + #robots then
+        local robot = robots[v-#frontiers-#humans]
+        name = simGetObjectName(robot)
       end
       if k < #robots then
-        print(simGetObjectName(explorers[k])..'\t->'..v)
+        print(simGetObjectName(explorers[k])..'\t->'..name)
       end
       if k == #robots then
-        print(agentName..'\t->'..v)
+        print(agentName..'\t->'..name)
       end
     end
   end
 end
+
+evaluationNames = {
+  'evaluation min optimistic',
+  'evaluation max pessimistic',
+  'evaluation avg no assumption'
+}
 
 explorationFunctions = { 
   SRE_Random,

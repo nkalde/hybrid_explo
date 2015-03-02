@@ -15,7 +15,8 @@ dofile(os.getenv('PWD')..'/Core/exploration/MRE/hungarianMethod.lua')
 MRE_Random=function(robots, frontiers, humans, frontiersL)
   local costs = computeC({robots[#robots]}, frontiers, humans, frontiersL)
   local assignments = {}
-  for explorer, frontiersC in ipairs(costs) do
+  for explorer=1,#costs do
+    local frontiersC = costs[explorer]
     assignments[explorer] = math.random(1,#frontiersC)
   end
   return assignments
@@ -36,7 +37,8 @@ end
 MRE_MinDist=function(robots, frontiers, humans, frontiersL)
   local costs = computeC(robots, frontiers, humans, frontiersL)
   local assignments = {}
-  for explorer, frontiersC in ipairs(costs) do
+  for explorer=1,#costs do
+    local frontiersC = costs[explorer]    
     --compute min dist, all min dist tasks, random selection between all min dist tasks
     local aMin, min = min(frontiersC)
     local minFrontiers = eq(frontiersC, min)
@@ -68,9 +70,11 @@ MRE_Greedy=function(robots, frontiers, humans, frontiersL)
   
   while cnt ~= #costs do --#robots
     local explorerI, frontierJ, min = nil, nil, math.huge
-    for i,costI in ipairs(costs) do
+    for i=1,#costs do
+      local costI = costs[i]
       if robotsE[i] == nil then
-        for j,costIJ in ipairs(costI) do
+        for j=1,#costI do
+          local costIJ = costI[j]
           if tasksE[j] == nil then
             if min >= costIJ then
               explorerI, frontierJ, min = i, j, costIJ
@@ -97,9 +101,11 @@ MRE_Greedy_dec=function(robots, frontiers, humans, frontiersL)
   
   while cnt ~= #costs and stop == false do --#robots and current robot not assigned yet
     local explorerI, frontierJ, min = nil, nil, math.huge
-    for i,costI in ipairs(costs) do
+    for i=1,#costs do
+      local costI = costs[i]
       if robotsE[i] == nil then
-        for j,costIJ in ipairs(costI) do
+        for j=1,#costI do
+          local costIJ = costI[j]
           if tasksE[j] == nil then
             if min >= costIJ then
               explorerI, frontierJ, min = i, j, costIJ
@@ -129,11 +135,14 @@ MRE_MinPos=function(robots, frontiers, humans, frontiersL)
   local assignments, positions, nCosts = {}, {}, {}
   
   --compute positions of robot i
-  for i,cI in ipairs(costs) do
+  for i=1,#costs do
+    local cI = costs[i]
     positions[i] = {}
-    for j,cIJ in ipairs(cI) do --to task j
+    for j=1,#cI do --to task j
+      local cIJ = cI[j]
       local cnt = 0
-      for k,cK in ipairs(costs) do --relative to other robots k
+      for k=1,#costs do --relative to other robots k
+        local cK = costs[k]
         local cKJ = cK[j]
         if cKJ < cIJ then
           cnt = cnt + 1
@@ -144,7 +153,8 @@ MRE_MinPos=function(robots, frontiers, humans, frontiersL)
   end
   
   --compute assignments
-  for i,positionsI in ipairs(positions) do
+  for i=1,#positions do
+    local positionsI = positions[i]
     --find min position
     local aMin, min = min(positionsI)
     
@@ -153,7 +163,8 @@ MRE_MinPos=function(robots, frontiers, humans, frontiersL)
     
     --equality resolution min cost
     local aMin, min = nil, math.huge
-    for j,eqf in ipairs(equalityFrontiers) do
+    for j=1,#equalityFrontiers do
+      local eqf = equalityFrontiers[j]
       local val = costs[i][eqf]
       if min >= val then
         aMin, min = j, val
@@ -171,11 +182,14 @@ MRE_MinPos_dec=function(robots, frontiers, humans, frontiersL) --dec
   for i=1,#robots do assignments[i] = 0 end
   
   --compute positions of robot i
-  for i,cI in ipairs(costs) do
+  for i=1,#costs do
+    local cI = costs[i]
     positions[i] = {}
-    for j,cIJ in ipairs(cI) do --to task j
+    for j=1,#cI do --to task j
+      local cIJ = cI[j]
       local cnt = 0
-      for k,cK in ipairs(costs) do --relative to other robots k
+      for k=1,#costs do --relative to other robots k
+        local cK = costs[k]
         local cKJ = cK[j]
         if cKJ < cIJ then
           cnt = cnt + 1
@@ -196,7 +210,8 @@ MRE_MinPos_dec=function(robots, frontiers, humans, frontiersL) --dec
     
   --equality resolution min cost
   local aMin, min = nil, math.huge
-  for j,eqf in ipairs(equalityFrontiers) do
+  for j=1,#equalityFrontiers do
+    local eqf = equalityFrontiers[j]
     local val = costs[i][eqf]
     if min >= val then
       aMin, min = j, val

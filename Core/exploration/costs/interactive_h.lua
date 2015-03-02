@@ -4,7 +4,7 @@
 computeCostsI=function(robots, frontiersT, humans, frontiersC)  
   --local cMRxFH = getCostMatrixRxFH_Experiment(robots,frontiersT,humans,frontiersC, alpha, sigma)
   --local cMRxFH = getCostMatrixRxFH_Experiment_ECAI(robots,frontiersT,humans,frontiersC, alpha, sigma)
-    local cMRxFH = getCostMatrixRxFH_TimeAngle2(robots,frontiersT,humans,frontiersC, alpha, sigma)
+    local cMRxFH = getCostMatrixRxFH_TimeAngle2(robots,frontiersT,humans,frontiersC, evalFun)
   --printCostIMatrix(cMRxFH,robots,frontiersT,humans)
   return cMRxFH
 end
@@ -34,14 +34,12 @@ getCostMatrixRxFH_TimeAngle2=function(robots,frontiersT,humans,frontiersC, alpha
   dRxFH = normalizeMat(dRxFH)
   ---[[
   local fh =  {}
-  for i,v in ipairs(frontiersT) do
-    fh[#fh+1]= v
+  for i=1,#frontiersT do
+    fh[#fh+1]= frontiersT[i]
   end
-  for i,v in ipairs(humans) do
-    fh[#fh+1]= v
+  for i=1,#humans do
+    fh[#fh+1]= humans[i]
   end
-  --printInterDistances(dRxFH,robots,fh)
-  --]]
   
   --time matrix
   local pRxFH = getPenaltyMatrixRxFH_TimeAngle2(robots,frontiersT,humans,frontiersC,sigma)
@@ -66,11 +64,11 @@ getCostMatrixRxFH_Experiment_ECAI=function(robots,frontiersT,humans,frontiersC, 
   dRxFH = normalizeMat(dRxFH)
   ---[[
   local fh =  {}
-  for i,v in ipairs(frontiersT) do
-    fh[#fh+1]= v
+  for i=1,#frontiersT do
+    fh[#fh+1]= frontiersT[i]
   end
-  for i,v in ipairs(humans) do
-    fh[#fh+1]= v
+   for i=1,#humans do
+    fh[#fh+1]= humans[i]
   end
   --printInterDistances(dRxFH,robots,fh)
   --]]
@@ -340,15 +338,16 @@ end
 penaltyAs=function(aSet,usualVel) --compute penalties for a_set
   if penaltiesAs == nil then
     penaltiesAs = {}
-  end  
-  for i,v in ipairs(aSet) do
-    penaltyA(v,usualVel)
+  end
+  for i=1,#aSet do
+    penaltyA(aSet[i],usualVel)
   end
 end
 
 getPenaltyVector=function(setA) --get a_set penalty vector
   local penaltyVector = {}
-  for i,v in ipairs(setA) do
+  for i=1,#setA do
+    local v = setA[i]
     local key = ''
     if type(v) == 'table' then
         key = '('..v[1]..','..v[2]..')' --frontier case
@@ -386,14 +385,20 @@ interAngles=function(setA, setB)
   --a poses, b poses
   local aAngles, bAngles = {}, {}
   local radToDeg = 180/math.pi
-  for i,v in ipairs(setA) do aAngles[i] = getOrientation(v)*radToDeg end
-  for i,v in ipairs(setB) do bAngles[i] = getOrientation(v)*radToDeg end
+  for i=1,#setA do 
+    aAngles[i] = getOrientation(setA[i])*radToDeg 
+  end
+  for i=1,#setB do 
+    bAngles[i] = getOrientation(setB[i])*radToDeg 
+  end
 
   set1, set2 = aAngles, bAngles
 
-  for i,v1 in ipairs(set1) do
+  for i=1,#set1 do
+    local v1=set1[i]
     interAngles[i] = {}
-    for j,v2 in ipairs(set2) do
+    for j=1,#set2 do
+      local v2=set2[j]
       local sourceA, targetA = aAngles[i], bAngles[j]
       local a = absoluteDiffAngle(sourceA,targetA)
       interAngles[i][j] = a
@@ -402,21 +407,27 @@ interAngles=function(setA, setB)
   return interAngles
 end
 
+--angle from start orientation to target and from target to target orientation
 --inter angle 2 abs(capA-capAToB), abs(capAToB-capB)
 interAngles2=function(setA, setB)
   local interAngles = {}
   local set1, set2 = nil
   --a poses, b poses
   local aAngles, bAngles = {}, {}
-  local radToDeg = 180/math.pi
-  for i,v in ipairs(setA) do aAngles[i] = math.deg(getOrientation(v)) end
-  for i,v in ipairs(setB) do bAngles[i] = math.deg(getOrientation(v)) end
+  for i=1,#setA do 
+    aAngles[i] = math.deg(getOrientation(setA[i])) 
+  end
+  for i=1,#setB do 
+    bAngles[i] = math.deg(getOrientation(setB[i])) 
+  end
   
   set1, set2 = aAngles, bAngles
 
-  for i,v1 in ipairs(set1) do
+  for i=1,#set1 do
+    local v1 = set1[i]
     interAngles[i] = {}
-    for j,v2 in ipairs(set2) do      
+    for j=1,#set2 do
+      local v2 = set2[j]      
       local sourceA, targetA = aAngles[i], bAngles[j]
       local sourceToTargetA = angleFromAToB(setA[i],setB[j])
       local a = absoluteDiffAngle(sourceA,sourceToTargetA)

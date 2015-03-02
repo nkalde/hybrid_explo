@@ -8,18 +8,27 @@
   r, maxX=simGetObjectFloatParameter(floor,18)
   r, minY=simGetObjectFloatParameter(floor,16)
   r, maxY=simGetObjectFloatParameter(floor,19)
-  
-  minX=math.ceil(minX)
-  minY=math.ceil(minY)
-  maxX=math.floor(maxX)
-  maxY=math.floor(maxY)
-  
+  r, minZ=simGetObjectFloatParameter(floor,17)
+  r, maxZ=simGetObjectFloatParameter(floor,20)
+  minX=math.floor(minX)
+  minY=math.floor(minY)
+  minZ=math.floor(minZ)
+  maxX=math.ceil(maxX)
+  maxY=math.ceil(maxY)
+  maxZ=math.ceil(maxZ)
+  if maxX <= 1 then
+    maxX=maxZ
+    minX=minZ
+  end
+  if maxY <= 1 then
+    maxY=maxZ
+    minY=minZ
+  end
   simSetScriptSimulationParameter(sim_handle_self,'minX',minX)
   simSetScriptSimulationParameter(sim_handle_self,'minY',minY)
   simSetScriptSimulationParameter(sim_handle_self,'maxX',maxX)
   simSetScriptSimulationParameter(sim_handle_self,'maxY',maxY)
   coef = simGetScriptSimulationParameter(sim_handle_self,'coef')
-  print("server",minX,minY,maxX,maxY)
   
   --PARAMETERS FOR EXPERIMENTS-
   local nbR = simGetStringParameter(sim_stringparam_app_arg1)
@@ -56,7 +65,7 @@
   --monitoringBeginToFile()
   --densify
   ratio = tonumber(simGetScriptSimulationParameter(sim_handle_self,'ratio'))
-  densifyUFS2(ratio)
+  --densifyUFS(ratio)
   agent, objects, humans, items, floor, server, explorers = objectsSet()
   baseScript=simGetScriptAssociatedWithObject(server)
 
@@ -144,8 +153,58 @@
 
   print('#####################\v')
   --]]
-  simSetThreadSwitchTiming(200)
-  
+
+simSetThreadSwitchTiming(200)
+
+-- Choose a port that is probably not used (try to always use a similar code):
+simSetThreadAutomaticSwitch(false)
+local portNb=simGetIntegerParameter(sim_intparam_server_port_next)
+local portStart=simGetIntegerParameter(sim_intparam_server_port_start)
+local portRange=simGetIntegerParameter(sim_intparam_server_port_range)
+local newPortNb=portNb+1
+if (newPortNb>=portStart+portRange) then
+  newPortNb=portStart
+end
+simSetIntegerParameter(sim_intparam_server_port_next,newPortNb)
+simSetThreadAutomaticSwitch(true)
+  -- Check what OS we are using:
+platf=simGetIntegerParameter(sim_intparam_platform)
+if (platf==0) then
+  pluginFile='v_repExtRemoteApi.dll'
+end
+if (platf==1) then
+  pluginFile='libv_repExtRemoteApi.dylib'
+end
+if (platf==2) then
+  pluginFile='libv_repExtRemoteApi.so'
+end
+
+  -- Check if the required remote Api plugin is there:
+moduleName=0
+moduleVersion=0
+index=0
+pluginNotFound=true
+while moduleName do
+  moduleName,moduleVersion=simGetModuleName(index)
+  if (moduleName=='RemoteApi') then
+    pluginNotFound=false
+  end
+  index=index+1
+end
+
+if (pluginNotFound) then
+  -- Plugin was not found
+  print('Error plugin')--,"Remote Api plugin was not found. ('"..pluginFile.."')&&nSimulation will not run properly")
+else
+  simExtRemoteApiStart(portNb,1300,false,true) -- this server function will automatically close again at simulation end
+  result=simLaunchExecutable("/Users/nkalde/Dropbox/Code/cpp/gradientClient/bin/server_remote_client",portNb.." "..agent.." "..simGetObjectName(agent).." "..coef.." "..densityH.." "..exploR.." "..evalFun,1) -- set the last argument to 1 to see the console of the launched client
+  if (result==-1) then
+    print('Error executable')--,"'gradientClient' could not be launched. &&nSimulation will not run properly")
+  end
+end
+
+
+  ---[[
 while (simGetSimulationState()~=sim_simulation_advancing_abouttostop) do
   
   if not ended then
@@ -181,3 +240,4 @@ end
 
 if (simGetSimulationState()==sim_simulation_advancing_abouttostop) then
 end
+--]]

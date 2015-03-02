@@ -7,12 +7,10 @@ followTrajectory=function(plan, goalHandle)
 end
 
 initNavig = function(plan, modelHandle, goalHandle, navigationFunction)
-  if #plan > 1 then
-    --followingTrajectory = true
-    --updateExplorationGrid(getPoseIJ(modelHandle))
-    stepTrajectory = 1
-    followingTrajectory = checkTrajectoryLocally(plan,stepTrajectory,getPoseIJ(modelHandle))
-  end
+    if #plan > 1 then
+      stepTrajectory = 1
+      followingTrajectory = true--it is the best choice at this point --checkTrajectoryLocally(plan,stepTrajectory)
+    end
 end
 
 --------------
@@ -21,11 +19,9 @@ end
 
 navigateAlongNext=function(plan, modelHandle, i)
   local pos = simGetObjectPosition(modelHandle, -1)
-  --local a, b = mappingWorld2Grid(pos[1],pos[2])
-  local posR = getPoseIJ(modelHandle)
-  followingTrajectory = checkTrajectoryLocally(plan,i,posR)
+  followingTrajectory = checkTrajectoryLocally(plan,i)
   
-  --if trajectory is good and plan is not finished
+  --if trajectory is still good and plan is not finished
   if followingTrajectory and i <= #plan then
     --next step
     local nStepX, nStepY = plan[i][1], plan[i][2]
@@ -41,7 +37,7 @@ navigateAlongNext=function(plan, modelHandle, i)
     end
     
     --update grid
-    if distanceEuclid(gT, posAfter) < 0.25 then
+    if distanceEuclid(gT, posAfter) < coef/2 then
       local c, d = mappingWorld2Grid(nStepX,nStepY)
       if updateExplorationGrid ~= nil then
         updateExplorationGrid({c, d})
@@ -60,14 +56,14 @@ end
 --------------------
 
 --check if the trajectory is still free 
-checkTrajectoryLocally=function(plan, i, pos) --during navigation state
+checkTrajectoryLocally=function(plan, i) --during navigation state
   if string.find(simGetObjectName(agent), 'Explorer#*%d*$')~=nil then --robot visibility
     scanDynamicCells(agent)
   else --all visibity
     scanDynamicCells(nil)
   end
   if i <= #plan then
-    local a1, a2 = mappingWorld2Grid(plan[i][1], plan[i][2])--plan[j][1], plan[j][2]--mappingWorld2Grid(plan[j][1], plan[j][2])
+    local a1, a2 = mappingWorld2Grid(plan[i][1], plan[i][2])
     return not occupied(a1, a2) and not hindered(a1,a2)
   else
     return false

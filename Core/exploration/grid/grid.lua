@@ -55,9 +55,7 @@ end
 --exploration grid stric update
 updateExplorationGrid=function(agent)
   if exploGrid then
-    --local cellsToUpdate =viewDist(agent,radiusView)--/coef)
-    --local cellsToUpdate =viewMasked(agent,radiusView)--/coef)
-    local cellsToUpdate =bresenhamView3(agent,radiusView)
+    local cellsToUpdate=bresenhamView3(agent,radiusView)
     local myPos = getPoseIJ(agent)
   	exploGrid[myPos[1]][myPos[2]] = fre
   	local cntHumans = 0
@@ -120,14 +118,14 @@ scanWorld=function() --update occupied set, animated set and free set
 	--set occupied and animated cells
 	local humans_items_explorers = {}
 	for k,v in pairs(humans) do
-	 table.insert(humans_items_explorers,v)
+	 humans_items_explorers[#humans_items_explorers+1]=v
 	end
 	for k,v in pairs(items) do
-	 table.insert(humans_items_explorers,v)
+   humans_items_explorers[#humans_items_explorers+1]=v
 	end
 	--explorers
 	for k,v in pairs(explorers) do
-   table.insert(humans_items_explorers,v)
+   humans_items_explorers[#humans_items_explorers+1]=v
   end
   
 	for k,obj in pairs(humans_items_explorers) do

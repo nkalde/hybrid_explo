@@ -4,20 +4,22 @@ echo "-----------------------"
 echo "------EXPERIMENTS------"
 echo "-----------------------"
 runScript=./Experiment/main/run.sh
-#$scene $tim $nbr $den $opt $alp $sig $max $num
+#$scene $tim $nbr $den $opt $alp $sig $max $num $fun
 tim=300000
 nbr=0
-den=0
+den=0.25
 opt=3
 alp=0.25
 sig=0.25
 max=500000
 num=1
+fun=1
 scenes[0]='test_empty.ttt'
 scenes[1]='test_cave.ttt'
 scenes[2]='test_roomsN.ttt'
 scenes[3]='test_corridor.ttt'
 scenes[4]='test_3rooms_corridor_small.ttt'
+scenes[5]='test_2rooms_corridor.ttt'
 
 #params="${scenes[0]} -s$tim -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num -q"
 #$runScript \
@@ -35,7 +37,7 @@ scenes[4]='test_3rooms_corridor_small.ttt'
 #$runScript \
 #$params
 
-params="${scenes[0]} -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num"
+params="${scenes[1]} -s$tim -g$nbr -g$den -g$opt -g$alp -g$sig -g$max -g$num -g$fun"
 $runScript \
 $params
 

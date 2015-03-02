@@ -1,18 +1,59 @@
+--seenFovMax={}
+
+--robot maximum field of view on real grid
+local fovMaxMask=function(radiusMax)
+  if seenFovMask==nil then
+    seenFovMask = {}
+    local posX = {0,0}
+    local posI = {0,0}
+    local list={{posI,0}}
+    local first,last=1,1
+    local marked = {}
+    
+    while(first <= last) do
+      local cell,radius = list[first][1], list[first][2]
+      local a,b = cell[1],cell[2]
+      local key=a..'#'..b
+      
+      if marked[key] == nil and radius<=radiusMax then
+        local x,neighbors = neighborsFunction(a,b) --pb if size grid too small
+        for i=1,#neighbors do
+          local n = neighbors[i]
+            local a,b= n[1],n[2]
+            local nX = {a*coef,b*coef}
+            local key=a..'#'..b
+            if marked[key] == nil then
+              list[#list+1] = {n,distanceFunction(posX,nX)}
+              last=last+1
+            end
+        end
+      end
+      
+      seenFovMask[#seenFovMask+1] = cell
+      marked[key]=true
+      first=first+1
+    end
+  end
+end
+
+
 --robot perception on real grid
-viewDist=function(agent,radiusMax)
+local viewDist=function(agent,radiusMax)
   local posX = getPoseXY(agent)
   local posI = getPoseIJ(agent)
   local list={{posI,0}}
   local first,last=1,1
   local marked,seen = {},{}
   
-  while(first<=last) do
+  while(first <= last) do
     local cell,radius = list[first][1], list[first][2]
     local a,b = cell[1],cell[2]
     local key=a..'#'..b
+    
     if marked[key] == nil and radius<=radiusMax then
       local neighbors = neighborsFunction(a,b)
-      for i,n in ipairs(neighbors) do
+      for i=1,#neighbors do
+        local n = neighbors[i]
         if n ~= -1 then
           local nX = getPoseXY(n)
           local a,b= n[1],n[2]
@@ -24,6 +65,7 @@ viewDist=function(agent,radiusMax)
         end
       end
     end
+    
     seen[#seen+1] = cell
     marked[key]=true
     first=first+1
@@ -31,22 +73,27 @@ viewDist=function(agent,radiusMax)
   return seen
 end
 
-chamferMask2D3x3=function()
+local chamferMask2D3x3=function()
  --N E S W NE SE SW NW
  local mask2D3x3 = {1*coef, 1*coef, 1*coef, 1*coef, math.sqrt(2)*coef, math.sqrt(2)*coef, math.sqrt(2)*coef, math.sqrt(2)*coef}
  return mask2D3x3
 end
 
-applyChamferMask2D3x3=function(cell, value)
+local applyChamferMask2D3x3=function(cell, value)
   local valN = neighborsMoore(cell[1],cell[2])
   local mask = chamferMask2D3x3()
   local applied = {}
-  for i,n in ipairs(valN) do
+  for i=1,#valN do
+    local n = valN[i]
     if n~=-1 then
       applied[#applied+1] = {n,value+mask[i]}
     end
   end
   return applied
+end
+
+local trueFunction=function(i,j)
+  return true
 end
 
 bresenhamView=function(cell,radiusMax) --first ver cannot see the boundaries
@@ -59,7 +106,8 @@ bresenhamView=function(cell,radiusMax) --first ver cannot see the boundaries
   local cInFov, cBres = viewDist(cell,radiusMax), {}
   local p = getPoseIJ(cell)
 
-  for i,v in ipairs(cInFov) do
+  for i=1,#cInFov do
+    local v = cInFov[i]
     if v ~= -1 then
      if los(p[1],p[2],v[1],v[2], function(i,j)
         return not occupied(i,j)
@@ -78,12 +126,13 @@ bresenhamView2=function(cell,radiusMax) --first ver cannot see the boundaries
   local cInFov, cBres = viewDist(cell,radiusMax), {}
   local p = getPoseIJ(cell)
 
-  for i,v in ipairs(cInFov) do
+  for i=1,#cInFov do
+    local v = cInFov[i]
     if v ~= -1 then
       local a,b = v[1], v[2]
       local key = a..'#'..b
       if mark[key] == nil then
-        local lin = line(p[1],p[2],v[1],v[2], function(i,j) return true end)
+        local lin = line(p[1],p[2],v[1],v[2], trueFunction)
         local firstOccupied = true
         for i,v in pairs(lin) do
           local a,b = v[1], v[2]
@@ -105,23 +154,24 @@ bresenhamView2=function(cell,radiusMax) --first ver cannot see the boundaries
   return cBres
 end
 
-bresenhamView3=function(cell,radiusMax) --first ver cannot see the boundaries --less redundancy
+bresenhamView3Old=function(cell,radiusMax) --first ver cannot see the boundaries --less redundancy
   local mark = {}
   occupiedCells()
   local cInFov, cBres = viewDist(cell,radiusMax), {}
   local p = getPoseIJ(cell)
 
-  for i,v in ipairs(cInFov) do
+  for i=1,#cInFov do
+    local v = cInFov[i]
     if v ~= -1 then
       local a,b = v[1], v[2]
       local key = a..'#'..b
       if mark[key] == nil then
-        local lin = line(p[1],p[2],v[1],v[2], function(i,j) return true end)
+        local lin = line(p[1],p[2],v[1],v[2], trueFunction)
         local firstOccupied = true
         for i,v in pairs(lin) do
           local a,b = v[1], v[2]
           local key = a..'#'..b
-          if firstOccupied then --mark and add visible cells until first obstacle
+          if firstOccupied then --mark and add visible cells until first obstacle (visible)
             if occupied (a,b) then
               firstOccupied = false
             end
@@ -129,7 +179,7 @@ bresenhamView3=function(cell,radiusMax) --first ver cannot see the boundaries --
               cBres[#cBres+1] = v
               mark[key] = true
             end
-          else --mark other cells on the line
+          else --mark other cells on the line (blocked)
             mark[key] = true
           end
         end
@@ -139,6 +189,42 @@ bresenhamView3=function(cell,radiusMax) --first ver cannot see the boundaries --
   return cBres
 end
 
+bresenhamView3=function(cell,radiusMax) --first ver cannot see the boundaries --less redundancy
+  local mark = {}
+  fovMaxMask(radiusMax)
+  occupiedCells()
+  local cInFov, cBres = seenFovMask, {}
+  local p = getPoseIJ(cell)
+
+  for i=1,#cInFov do
+    local v0 = cInFov[i]
+    local v = {v0[1]+p[1], v0[2]+p[2]}
+    local a,b = v[1], v[2]
+    if insideGrid(a,b) == true then
+      local key = a..'#'..b
+      if mark[key] == nil then
+        local lin = line(p[1],p[2],v[1],v[2], trueFunction)
+        local firstOccupied = true
+        for i,v in pairs(lin) do
+          local a,b = v[1], v[2]
+          local key = a..'#'..b
+          if firstOccupied then --mark and add visible cells until first obstacle (visible)
+            if occupied (a,b) then
+              firstOccupied = false
+            end
+            if mark[key] == nil then
+              cBres[#cBres+1] = v
+              mark[key] = true
+            end
+          else --mark other cells on the line (blocked)
+            mark[key] = true
+          end
+        end
+      end
+    end
+  end
+  return cBres
+end
 radiusMaskChamfer=function(cell,radiusMax)
   local posI = getPoseIJ(cell)
   local list={{posI,0}}
@@ -151,7 +237,8 @@ radiusMaskChamfer=function(cell,radiusMax)
     local key=a..'#'..b
     if marked[key] == nil and radius<=radiusMax then
       local neighbors = applyChamferMask2D3x3(cell,radius)
-      for i,n in ipairs(neighbors) do
+      for i=1,#neighbors do
+          local n = neighbors[i]
           list[#list+1] = n
           last=last+1            
       end
@@ -177,7 +264,8 @@ shadowMaskChamfer=function(cell,radiusMax)
  lists[1] = {}
  lists[1][key] = {coord,val,state} --l0 init
  
- for i,listI in ipairs(lists) do
+ for i=1,#lists do
+  local listI = lists[i]
   for k,cvs in pairs(listI) do   
     local coord, value, state = cvs[1],cvs[2],cvs[3]
     if occupied(coord[1],coord[2]) then
@@ -186,7 +274,8 @@ shadowMaskChamfer=function(cell,radiusMax)
     local key = coord[1]..'#'..coord[2]
     mark[key]=true
     local neighbors = applyChamferMask2D3x3(cvs[1],cvs[2])
-    for l,cv in ipairs(neighbors) do
+    for l=1,#neighbors do
+      local cv = neighbors[l]
       local coord, value = cv[1],cv[2]
       if value <= radiusMax then
         if lists[i+1] == nil then
@@ -207,7 +296,8 @@ shadowMaskChamfer=function(cell,radiusMax)
  end
  
  local seen = {}
- for i,listI in ipairs(lists) do
+ for i=1,#lists do
+  local listI = lists[i]
   for k,cvs in pairs(listI) do   
     if cvs[3] == free then
       seen[#seen+1]=cvs[1]

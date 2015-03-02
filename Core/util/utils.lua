@@ -75,6 +75,27 @@ if (simGetScriptExecutionCount()==0) then
 		end
 	end
 
+  --Function to compute the closest distance between object 1 and object 2 --pb here
+  twod_gaussian=function(A,x0,y0,sigmax,sigmay,x,y)
+    --2d gaussian
+    return A*math.exp(- ( ((x-x0)*(x-x0))/ 2*(sigmax*sigmax) + ((y-y0)*(y-y0))/2*(sigmay*sigmay)))
+  end
+
+  twod_gaussian2=function(A,x0,y0,a,b,c)
+    return A*math.exp(- (a*(x-x0)*(x-x0) + 2*b*(x-x0)*(y-y0) +c*(y-y0)*(y-y0) ) )
+  end
+    
+  pspace=function(xq,yq)
+    front_term = 0
+    back_term = 0 
+    if yq >= 0 then
+      front_term = twod_gaussian2(1,0,0,sigmaxx,2*sigmaxx,xq,yq)
+    else
+      back_term = twod_gaussian2(1,0,0,sigmaxx,sigmaxx,xq,yq)
+    end
+    return front_term + back_term
+  end
+  
 	-- Function computing the vector from object1 to object2 -> from 2 to 1
 	normalizedVector=function(object1, object2)
 		--c1x, c1y = centerBoundingBox(object1)
@@ -162,22 +183,39 @@ if (simGetScriptExecutionCount()==0) then
           objectI =  base
         end
         --]]
-				table.insert(humans, objectI)
-				table.insert(objects, objectI)
+				humans[#humans+1]=objectI
+				objects[#objects+1]=objectI
       end
 			--items
 			if string.find(nameI, 'Obj')~=nil or string.find(nameI, 'Cuboid')~=nil then
-				table.insert(items, objectI)
-				table.insert(objects, objectI)
+				items[#items+1]=objectI
+			  objects[#objects+1]=objectI
 			end
 			if string.find(nameI, "Server$")~=nil  then --'floor'
 				server=modelObjects[i]
 			end
 			if string.find(nameI, 'Explorer#*%d*$')~=nil and object~=objectI then
-        table.insert(explorers, objectI)
-        table.insert(objects, objectI)
+        explorers[#explorers+1]=objectI
+        objects[#objects+1]=objectI
       end
 		end
 		return object, objects, humans, items, floor, server, explorers
 	end
+	
+	function shallowcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in pairs(orig) do
+            copy[orig_key] = orig_value
+        end
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+  end
+
 end
+
+

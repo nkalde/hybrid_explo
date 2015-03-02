@@ -11,13 +11,13 @@ densify=function(ratioHuman, numberExplorers)
     simLoadModel(modelDir..'explorer.ttm')
     local handle = simGetObjectLastSelection()
     simSetObjectParent(handle,server,true)
-    table.insert(handles,#handles+1,handle)
+    handles[#handles+1]=handle
   end
   
   for i=1,rand do
     simLoadModel(modelDir..'human0_1.ttm')
     local handle = simGetObjectLastSelection()
-    table.insert(handles,#handles+1,handle)
+    handles[#handles+1]=handle
   end
   
   for i=1,#handles do
@@ -40,10 +40,10 @@ densify=function(ratioHuman, numberExplorers)
   return handles
 end
 
-densifyUFS=function(ratioH)
+densifyUFS=function(ratioH)--PROBLEM
   if ratioH > 0 then
     local coefTmp = coef
-    coef = 1
+    --coef = 1
     local positions, cntObs = occupiedCells()
     local handles = {}
     local totCells = (maxX-minX)*(maxY-minY)
@@ -53,10 +53,10 @@ densifyUFS=function(ratioH)
     
     simRemoveObjectFromSelection(sim_handle_all,-1)
     simLoadModel(modelDir..'human0_1.ttm')
-    table.insert(handles,#handles+1,simGetObjectSelection()[1])
+    handles[#handles+1]=simGetObjectSelection()[1]
     for i=2,nbHumansFreeSpace do
       simCopyPasteSelectedObjects()
-      table.insert(handles,#handles+1,simGetObjectSelection()[1])
+      handles[#handles+1]=simGetObjectSelection()[1]
     end
     
     local nbHumans = 1
@@ -64,7 +64,7 @@ densifyUFS=function(ratioH)
     local minI, minJ = mappingWorld2Grid(minX,minY)
     local maxI, maxJ = mappingWorld2Grid(maxX,maxY)
     local cnt=0
-
+    local realHandles = {}
     --print('freecells',freeCells)
     --print('nbHumans',nbHumansFreeSpace)
     --print('minX : '..minX, 'minY : '..minY, 'maxX : '..maxX, 'maxY : '..maxY)
@@ -78,6 +78,7 @@ densifyUFS=function(ratioH)
               local x, y = mappingGrid2World(i,j)
               local pos = simGetObjectPosition(handles[nbHumans],-1)
               simSetObjectPosition(handles[nbHumans],-1,{x,y, pos[3]})
+              realHandles[nbHumans] = handles[nbHumans]
               nbHumans = nbHumans+1
             end
             cnt = cnt+1
@@ -91,8 +92,39 @@ densifyUFS=function(ratioH)
     end
     simDeleteSelectedObjects()
     simRemoveObjectFromSelection(sim_handle_all,-1)
-    
-    return handles
+    --remove the overleft humans
+    return realHandles
   end
   return {}
+end
+
+densifyUFS2=function(ratioH)
+  local handles = {}
+  if ratioH > 0 then
+    local positions, cntObs = occupiedCells()
+    local area_size = (maxX-minX)*(maxY-minY)
+    local cnt=0
+    simRemoveObjectFromSelection(sim_handle_all,-1)
+    for x=minX+1, maxX-1, 1 do
+      for y=minY+1, maxY-1, 1 do
+        local i,j = mappingWorld2Grid(x,y)
+        if positions[i..'#'..j] == nil and cnt <= ratioH*area_size then
+            if math.random() < ratioH then
+              if cnt == 0 then
+                simLoadModel(modelDir..'human0_1.ttm')
+              else
+                simCopyPasteSelectedObjects()
+              end
+              positions[i..'#'..j] = true
+              handles[cnt+1]=simGetObjectSelection()[1]
+              local pos = simGetObjectPosition(handles[cnt+1],-1)
+              simSetObjectPosition(handles[cnt+1],-1,{x,y, pos[3]})
+              cnt = cnt+1
+            end
+        end
+      end
+    end
+    simRemoveObjectFromSelection(sim_handle_all,-1)
+  end
+  return handles
 end

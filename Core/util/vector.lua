@@ -1,13 +1,27 @@
 ----------
 --MATRIX--
 ----------
+
+function tableConcat(t1,t2)
+    local t = {}
+    for i=1,#t1 do
+        t[#t+1] = t1[i]
+    end
+    for i=1,#t2 do
+        t[#t+1] = t2[i]
+    end
+    return t
+end
+
  --normalize matrix
  function normalizeMat(t)
     if #t == 0 or #t[1] == 0 then return nil end
     local iMax,jMax, max = maxMat(t)
     --print(max)
-    for i,ti in ipairs(t) do
-      for j,tij in ipairs(ti) do
+    for i=1,#t do
+      local ti = t[i]
+      for j=1,#ti do
+        local tij = ti[j]
         if tij ~= 0 then
             t[i][j] = tij/max
         end
@@ -19,8 +33,10 @@
   --transpose matrix
   transpose=function(mat)
     local transposedMat = {}
-    for i,v in ipairs(mat) do
-      for j,v2 in ipairs(v) do
+    for i=1,#mat do
+      local v = mat[i]
+      for j=1,#v do
+        local v2 = v[i]
         if transposedMat[j] == nil then
           transposedMat[j] = {}
         end
@@ -66,12 +82,25 @@
     return key, value
   end
   
+  --find min table
+  function avg(t)
+    if #t == 0 then return nil, nil end
+    local nb, value = #t, t[1]
+    for i = 2, #t do
+            value = value + t[i]
+    end
+    value = value / nb
+    return 1, value
+  end
+  
   --find max matrix
   function maxMat(t)
     if #t == 0 or #t[1] == 0 then return nil, nil, nil end
     local key1, key2, value = 1, 1, t[1][1]
-    for i,ti in ipairs(t) do
-      for j,tij in ipairs(ti) do
+    for i=1,#t do
+      local ti = t[i]
+      for j=1,#ti do
+        local tij = ti[j]
         if value < tij and tij ~= math.huge then
             key1, key2, value = i, j, tij
         end
@@ -83,8 +112,10 @@
   --replace a by b in matrix t
   function replaceMat(t,a,b)
     if #t == 0 or #t[1] == 0 then return nil end
-    for i,ti in ipairs(t) do
-      for j,tij in ipairs(ti) do
+    for i=1,#t do
+      local ti = t[i]
+      for j=1,#ti do
+        local tij = ti[j]
         if tij == a then
             t[i][j] = b
         end
@@ -97,9 +128,10 @@
   function eq(t,val)
     if #t == 0 then return nil end
     local keys = {}
-    for k,v in ipairs(t) do
+    for i=1,#t do
+      local v = t[i]
       if val == v then
-        keys[#keys+1] = k
+        keys[#keys+1] = i
       end
     end
     return keys
@@ -108,9 +140,11 @@
   --add matrices
   function addMat(t1,t2)
     local addM = {}
-    for i,t1i in ipairs(t1) do
+    for i=1,#t1 do
+      local t1i = t1[i]
       addM[i] = {}
-      for j,t1ij in ipairs(t1i) do
+      for j=1,#t1i do
+        local t1ij = t1i[j]
         addM[i][j] = t1ij + t2[i][j]
       end
     end
@@ -120,9 +154,11 @@
   --add matrices
   function mulMat(t1,t2)
     local addM = {}
-    for i,t1i in ipairs(t1) do
+    for i=1,#t1 do
+      local t1i = t1[i]
       addM[i] = {}
-      for j,t1ij in ipairs(t1i) do
+      for j=1,#t1i do
+        t1ij = t1i[j]
         addM[i][j] = t1ij * t2[i][j]
       end
     end
@@ -187,7 +223,8 @@ end
 --norm
 normV=function(v1)
   local nV = 0
-  for i,v in ipairs(v1) do
+  for i=1,#v1 do
+    local v = v1[i]
     nV = nV +v*v
   end
   nV = math.sqrt(nV)
@@ -199,13 +236,15 @@ end
 linearRegression=function(setOfPoints)
   local meanX, meanY, nbPoints =0, 0, #setOfPoints
   local varX, covXY = 0, 0
-  for i,v in ipairs(setOfPoints) do
+  for i=1,#setOfPoints do
+    local v = setOfPoints[i]
     local x,y = v[1],v[2]
     meanX, meanY = meanX + x, meanY + y
   end
   meanX, meanY = meanX/nbPoints, meanY/nbPoints
   
-  for i,v in ipairs(setOfPoints) do
+  for i=1,#setOfPoints do
+    local v = setOfPoints[i]
     local x,y = v[1],v[2]
     varX = varX + math.pow((x-meanX),2)
     covXY = covXY + (x-meanX)*(y-meanY)
